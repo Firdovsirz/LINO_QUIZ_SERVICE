@@ -1,4 +1,4 @@
-package com.example.lino_quiz_services.config;
+package com.example.lino_quiz_service.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

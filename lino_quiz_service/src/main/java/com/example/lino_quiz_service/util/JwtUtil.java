@@ -1,4 +1,4 @@
-package com.example.lino_quiz_services.util;
+package com.example.lino_quiz_service.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;

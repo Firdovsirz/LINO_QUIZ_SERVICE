@@ -1,7 +1,7 @@
-package com.example.lino_quiz_services.DTO;
+package com.example.lino_quiz_service.DTO;
 
 public class ApiResponse<T> {
-    private static String statusMessage;
+    private String statusMessage;
     private int status;
     private T data;
     private Integer otp;
@@ -19,7 +19,7 @@ public class ApiResponse<T> {
     }
 
     public static <T> ApiResponse<T> success(T data) {
-        return new ApiResponse<>(200, data, statusMessage);
+        return new ApiResponse<>(200, data, "Success");
     }
     public static <T> ApiResponse<T> created(T data) {
         return new ApiResponse<>(201, data, "Successfully created.");

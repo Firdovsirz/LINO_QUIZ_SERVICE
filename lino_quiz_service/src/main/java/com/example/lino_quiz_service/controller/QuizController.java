@@ -3,11 +3,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-//import com.example.lino_quiz_service.DTO.CategoryRepository;
 import com.example.lino_quiz_service.DTO.QuizQuestionRepository;
 import com.example.lino_quiz_service.DTO.QuizRepository;
-//import com.example.lino_quiz_service.entity.Category;
 import com.example.lino_quiz_service.entity.Quiz;
 import com.example.lino_quiz_service.entity.QuizQuestion;
 
@@ -113,15 +110,23 @@ public class QuizController {
                 String questionId = String.valueOf(question.getId());
                 String userAnswer = answers.get(questionId);
                 
-                // Set the user's chosen option and email
                 if (userAnswer != null) {
                     question.setChosenOption(userAnswer);
                     question.setEmail(email);
                     
-                    // Save the updated question with user's answer
                     quizQuestionRepository.save(question);
-                    
-                    if (userAnswer.equalsIgnoreCase(question.getCorrectOption())) {
+
+                    // userAnswer = "A", "B", "C" və ya "D"
+                    // onu variant mətni ilə əvəz et
+                    String correctAnswerText = null;
+                    switch (userAnswer.toUpperCase()) {
+                        case "A": correctAnswerText = question.getOptionA(); break;
+                        case "B": correctAnswerText = question.getOptionB(); break;
+                        case "C": correctAnswerText = question.getOptionC(); break;
+                        case "D": correctAnswerText = question.getOptionD(); break;
+                    }
+
+                    if (correctAnswerText != null && correctAnswerText.equalsIgnoreCase(question.getCorrectOption())) {
                         correctCount++;
                     }
                 }
@@ -142,7 +147,7 @@ public class QuizController {
     }
     
     // Get quiz questions
-    @GetMapping("/{serialNumber}/questions")
+    @GetMapping("/{serialNumber}/get-questions")
     public ResponseEntity<?> getQuizQuestions(@PathVariable int serialNumber) {
         try {
             // Check if quiz exists
@@ -155,6 +160,49 @@ public class QuizController {
             return ResponseEntity.ok(questions);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error retrieving questions: " + e.getMessage());
+        }
+    }
+
+    // Search quizzes by title (case-insensitive)
+    @GetMapping("/search")
+    public ResponseEntity<?> searchQuizzes(@RequestParam String query) {
+        try {
+            if (query == null || query.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Search query is required.");
+            }
+            
+            List<Quiz> quizzes = quizRepository.findByTitleContainingIgnoreCase(query.trim());
+            
+            if (quizzes.isEmpty()) {
+                return ResponseEntity.ok("No quizzes found matching: " + query);
+            }
+            
+            return ResponseEntity.ok(quizzes);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error searching quizzes: " + e.getMessage());
+        }
+    }
+
+    // Delete quiz by serial number
+    @DeleteMapping("/{serialNumber}/delete")
+    public ResponseEntity<?> deleteQuiz(@PathVariable int serialNumber) {
+        try {
+            // Check if quiz exists
+            Optional<Quiz> quiz = quizRepository.findByQuizSerialNumber(serialNumber);
+            if (!quiz.isPresent()) {
+                return ResponseEntity.badRequest().body("Quiz with serial number " + serialNumber + " not found.");
+            }
+            
+            // Delete all questions for this quiz first
+            List<QuizQuestion> questions = quizQuestionRepository.findByQuizSerialNumber(serialNumber);
+            quizQuestionRepository.deleteAll(questions);
+            
+            // Delete the quiz
+            quizRepository.delete(quiz.get());
+            
+            return ResponseEntity.ok("Quiz with serial number " + serialNumber + " deleted successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting quiz: " + e.getMessage());
         }
     }
 }

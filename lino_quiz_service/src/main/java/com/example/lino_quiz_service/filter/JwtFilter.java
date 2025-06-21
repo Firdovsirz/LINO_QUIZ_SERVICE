@@ -1,4 +1,4 @@
-package com.example.lino_quiz_services.filter;
+package com.example.lino_quiz_service.filter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -12,7 +12,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.example.lino_quiz_services.util.JwtUtil;
+import com.example.lino_quiz_service.util.JwtUtil;
 
 import java.io.IOException;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.example.lino_quiz_services.DTO;
+package com.example.lino_quiz_service.DTO;
 
 public class ErrorDetailsDTO {
     private String message;
